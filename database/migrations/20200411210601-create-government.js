@@ -1,39 +1,25 @@
 "use strict";
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("users", {
+    return queryInterface.createTable("governments", {
       id: {
         allowNull: false,
+        autoIncrement: true,
         primaryKey: true,
-        type: Sequelize.UUID,
-      },
-      username: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      email: {
-        type: Sequelize.STRING,
-        allowNull: false,
-        unique: true,
-      },
-      password: {
-        type: Sequelize.STRING,
-        allowNull: false,
-      },
-      role_id: {
         type: Sequelize.INTEGER,
-        allowNull: false,
-        defaultValue: 1,
-        references: {
-          model: "roles",
-          key: "id",
-          onDelete: "cascade",
-          onUpdate: "cascade",
-        },
       },
-      remember_me: {
+      name: {
         type: Sequelize.STRING,
+        unique: true,
+        allowNull: false,
+      },
+      addedBy: {
+        type: Sequelize.UUID,
+        allowNull: false,
+        references: {
+          model: "users",
+          key: "id",
+        },
       },
       createdAt: {
         allowNull: false,
@@ -48,6 +34,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("users");
+    return queryInterface.dropTable("governments");
   },
 };

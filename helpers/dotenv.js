@@ -2,7 +2,6 @@ const { config } = require("dotenv");
 class dotenv {
   constructor() {
     config();
-
     return this.find;
   }
 
