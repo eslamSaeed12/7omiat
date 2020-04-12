@@ -14,10 +14,9 @@ class sanitizer {
 
   $int(int) {
     try {
-      if (!str) throw new Error("str param is missing !");
-      if (!Number.isInteger(int))
-        throw new Error("int param should only integer");
-      return Number.parseInt(this.$str(int));
+      if (!int) throw new Error("int param is missing !");
+      if (!Number.isInteger(int)) return 0;
+      return Number.parseInt(int);
     } catch (e) {
       console.log(e);
     }
@@ -26,9 +25,8 @@ class sanitizer {
   $float(float) {
     try {
       if (!float) throw new Error("float param is missing !");
-      if (typeof float !== "number")
-        throw new Error("int param should only number");
-      return Number.parseFloat(this.$str(int));
+      if (typeof float !== "number") return 0;
+      return Number.parseFloat(float);
     } catch (e) {
       console.log(e);
     }

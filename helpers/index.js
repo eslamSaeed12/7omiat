@@ -4,4 +4,5 @@ module.exports = {
   jwt: require("./jwt"),
   sanitizer: require("./sanitizer"),
   restful: require("./Restful.helpers"),
+  v: require("validator"),
 };

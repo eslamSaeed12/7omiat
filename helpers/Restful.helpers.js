@@ -8,9 +8,12 @@ module.exports = ({ type, msg }) => {
           errors: $errs,
         };
       },
-      404: {
-        code: 404,
-        message: "resource not found",
+      404: ($errs) => {
+        return {
+          code: 404,
+          message: "resource not found",
+          error: $errs,
+        };
       },
       401: {
         code: 401,
