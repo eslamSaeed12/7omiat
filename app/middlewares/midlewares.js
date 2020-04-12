@@ -10,23 +10,34 @@ const morgan = require("morgan");
 const expressWinston = require("express-winston");
 const winston = require("winston");
 const winstonConfig = require("../../configs/logger")(winston);
-const { dotenv } = helpers;
+const guard = require("../core/guards.index");
+const { dotenv, jwt } = helpers;
 
-app.use(helmet());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+(async () => {
+  const authMD = (r) => {
+    return require("./auth")({
+      decode: jwt.decode,
+      guard: guard(r),
+      dotenv,
+    });
+  };
 
-if (dotenv("NODE_ENV") === "development") {
-  app.use(morgan("dev"));
-} else {
-  app.use(expressWinston.logger(winstonConfig.http));
-}
+  const db = require("../../models/index");
+  app.use(helmet());
+  app.use(bodyParser.json());
+  app.use(bodyParser.urlencoded());
 
-app.use(connectId());
-app.use(routes({ controllers, helpers }));
+  if (dotenv("NODE_ENV") === "development") {
+    app.use(morgan("dev"));
+  } else {
+    app.use(expressWinston.logger(winstonConfig.http));
+  }
 
-if (dotenv("NODE_ENV") !== "development") {
-  app.use(expressWinston.errorLogger(winstonConfig.error));
-}
+  app.use(connectId());
+  app.use(routes({ controllers, helpers, db, authMD }));
 
+  if (dotenv("NODE_ENV") !== "development") {
+    app.use(expressWinston.errorLogger(winstonConfig.error));
+  }
+})().catch((e) => console.log(e));
 module.exports = app;

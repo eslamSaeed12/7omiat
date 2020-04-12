@@ -3,7 +3,7 @@ class guard extends AbstractGuard {
   constructor({ id }) {
     try {
       super();
-      this.role = "superuser";
+      this.role = "moderator";
       return this.isAuthenticated({ id });
     } catch (e) {
       console.log(e);

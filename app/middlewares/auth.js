@@ -1,4 +1,4 @@
-module.exports = ({ decode, guard }) => {
+module.exports = ({ decode, guard, dotenv }) => {
   return async (req, res, next) => {
     try {
       //jwt token of the request
@@ -6,12 +6,13 @@ module.exports = ({ decode, guard }) => {
 
       if (!token) return res.redirect("/"); // redirect to the unauthoriezed endpoint
 
-      const id = decode(token).id || null;
+      const id = decode(token, dotenv("secret")).id;
 
       if (!id) return res.redirect("/"); // redirect to the unauthoriezed endpoint
 
       const guardGate = await guard({ id });
 
+      console.log(guardGate);
       if (!guardGate) return res.redirect("/"); // redirect to the unauthoriezed endpoint
 
       req.auth = guardGate;
