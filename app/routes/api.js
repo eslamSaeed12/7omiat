@@ -3,15 +3,13 @@ module.exports = ({ controllers, helpers, db, authMD }) => {
   const { hospitals, auth } = controllers({ helpers, db });
 
   (async () => {
+    //route.get("/hold", await authMD("moderator"), hospitals.index);
 
-
-
-    route.get("/hold", await authMD("moderator"), hospitals.index);
     route.post("/login", auth.login);
-
-
-
-  })();
+    
+  })().catch((e) => {
+    console.log(e);
+  });
 
   return route;
 };
