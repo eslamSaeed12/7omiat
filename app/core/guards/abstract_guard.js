@@ -8,7 +8,7 @@ class gaurd {
   async isAuthenticated({ id }) {
     try {
       if (typeof id !== "string") return false;
-      if (!(await this.checker(this.role))) {
+      if (!this.checker()) {
         throw new Error("this role is not exist in app roles");
       }
 
@@ -18,23 +18,32 @@ class gaurd {
         return false;
       }
 
-      if (user.role.title !== this.role) {
-        return false;
+      if (Array.isArray(this.role)) {
+        if (this.role.includes(user.role.title)) {
+          return user;
+        }
+      } else {
+        return user.role.title !== this.role ? false : user;
       }
-
-      return user;
     } catch (e) {
       console.log(e);
     }
   }
   checker() {
     try {
-      // check if role stanadard with the roles enums
-      const role_ = this._.find(this.roles, (r) => r.role === this.role);
-      if (!role_) {
-        return false;
+      if (Array.isArray(this.role)) {
+        // original
+        const rolesFlatten = [this.roles[0].role, this.roles[1].role];
+        const intersect = this._.intersection(rolesFlatten, this.role);
+        return this._.isEqual(intersect.sort(), this.role.sort());
+      } else {
+        // check if role stanadard with the roles enums
+        const role_ = this._.find(this.roles, (r) => r.role === this.role);
+        if (!role_) {
+          return false;
+        }
+        return true;
       }
-      return true;
     } catch (e) {
       console.log(e);
     }

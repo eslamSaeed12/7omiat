@@ -13,14 +13,6 @@ module.exports = {
         unique: true,
         allowNull: false,
       },
-      addedBy: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
-        },
-      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE,

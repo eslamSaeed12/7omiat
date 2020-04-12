@@ -12,7 +12,6 @@ module.exports = ({ decode, guard, dotenv }) => {
 
       const guardGate = await guard({ id });
 
-      console.log(guardGate);
       if (!guardGate) return res.redirect("/"); // redirect to the unauthoriezed endpoint
 
       req.auth = guardGate;

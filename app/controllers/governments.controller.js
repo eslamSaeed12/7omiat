@@ -1,18 +1,18 @@
 const { Op } = require("sequelize");
-const rolesController = ({ helpers, db }) => {
+const govsController = ({ helpers, db }) => {
   return {
     async index(req, res, next) {
       try {
-        const { role } = db;
+        const { government } = db;
         let cover;
-        const roles = await role.findAll();
-        if (!roles.length) {
+        const governments = await government.findAll();
+        if (!governments.length) {
           cover = helpers.restful({ type: 0, msg: 404 })([
-            "no roles added in database yet",
+            "no governments added in database yet",
           ]);
           return res.status(cover.code).json(cover);
         }
-        cover = helpers.restful({ type: 1, msg: 302 })(roles);
+        cover = helpers.restful({ type: 1, msg: 302 })(governments);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -20,19 +20,19 @@ const rolesController = ({ helpers, db }) => {
     },
     async find(req, res, next) {
       try {
-        const { role } = db;
+        const { government } = db;
         const { id } = req.params;
         let cover;
-        const $role = await role.findOne({
+        const $government = await government.findOne({
           where: { id: helpers.sanitizer.$int(id) },
         });
-        if (!$role) {
+        if (!$government) {
           cover = helpers.restful({ type: 0, msg: 404 })([
-            "maybe this role deleted or not exist",
+            "maybe this government deleted or not exist",
           ]);
           return res.status(cover.code).json(cover);
         }
-        cover = helpers.restful({ type: 1, msg: 302 })($role);
+        cover = helpers.restful({ type: 1, msg: 302 })($government);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -40,24 +40,24 @@ const rolesController = ({ helpers, db }) => {
     },
     async create(req, res, next) {
       try {
-        const { title } = req.body;
+        const { name } = req.body;
         const { v, sanitizer } = helpers;
         const { $str } = sanitizer;
-        const { role } = db;
+        const { government } = db;
         const errors = [];
         let cover;
-        if (!title) {
-          errors.push("title is missing");
+        if (!name) {
+          errors.push("name is required !");
         }
 
-        if (!v.isLength(title || "", { min: 6, max: 18 })) {
-          errors.push("title should at least 6 chars and at maxmimum 18");
+        if (!v.isLength(name || "", { min: 4, max: 18 })) {
+          errors.push("name should at least 6 chars and at maxmimum 18");
         }
 
         // unqiueness
 
-        if (await role.findOne({ where: { title: $str(title) || "" } })) {
-          errors.push("this title is exist try another one");
+        if (await government.findOne({ where: { name: $str(name) || "" } })) {
+          errors.push("this name is exist try another one");
         }
 
         if (errors.length) {
@@ -65,8 +65,11 @@ const rolesController = ({ helpers, db }) => {
           return res.status(cover.code).json(cover);
         }
 
-        const newRole = await role.create({ title: $str(title) });
-        cover = helpers.restful({ type: 1, msg: 201 })(newRole);
+        const newgovernment = await government.create({
+          name: $str(name),
+        });
+
+        cover = helpers.restful({ type: 1, msg: 201 })(newgovernment);
 
         return res.status(cover.code).json(cover);
       } catch (e) {
@@ -76,10 +79,10 @@ const rolesController = ({ helpers, db }) => {
 
     async update(req, res, next) {
       try {
-        const { id, title } = req.body;
+        const { id, name } = req.body;
         const { sanitizer } = helpers;
         const { $str, $int } = sanitizer;
-        const { role } = db;
+        const { government } = db;
         const errors = [];
         let cover;
         if (!id) {
@@ -87,38 +90,40 @@ const rolesController = ({ helpers, db }) => {
         }
 
         // check if exist
-        const RoleInstance = await role.findOne({ where: { id: $int(id) } });
+        const governmentInstance = await government.findOne({
+          where: { id: $int(id) },
+        });
 
-        if (!RoleInstance) {
-          errors.push("this role is not exist");
+        if (!governmentInstance) {
+          errors.push("this government is not exist");
           cover = helpers.restful({ type: 0, msg: 404 })(errors);
           return res.status(cover.code).json(cover);
         }
 
-        // check for title
-        if (!title) {
-          errors.push("title is required !");
+        // check for name
+        if (!name) {
+          errors.push("name is required !");
         }
 
-        if (String(title)) {
-          errors.push("title should only string !");
+        if (String(name)) {
+          errors.push("name should only string !");
         }
 
-        if (!v.isLength(title || "", { min: 6, max: 18 })) {
-          errors.push("title should at least 6 chars and at maxmimum 18");
+        if (!v.isLength(name || "", { min: 4, max: 18 })) {
+          errors.push("name should at least 6 chars and at maxmimum 18");
         }
-        
+
         // check if unique
-        const uniqueRole = await role.findOne({
-          where: { title: $str(title), [Op.not]: { id: $int(id) } },
+        const uniquegovernment = await government.findOne({
+          where: { name: $str(name), [Op.not]: { id: $int(id) } },
         });
 
-        if (uniqueRole) errors.push("title is exist try another one");
+        if (uniquegovernment) errors.push("name is exist try another one");
 
-        RoleInstance.title = $str(title);
-        await RoleInstance.save();
-        await RoleInstance.reload();
-        cover = helpers.restful({ type: 1, msg: 200 })(RoleInstance);
+        governmentInstance.name = $str(name);
+        await governmentInstance.save();
+        await governmentInstance.reload();
+        cover = helpers.restful({ type: 1, msg: 200 })(governmentInstance);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -129,7 +134,7 @@ const rolesController = ({ helpers, db }) => {
         const { id } = req.body;
         const { sanitizer } = helpers;
         const { $int } = sanitizer;
-        const { role } = db;
+        const { government } = db;
         const errors = [];
         let cover;
 
@@ -138,14 +143,16 @@ const rolesController = ({ helpers, db }) => {
         }
 
         // check if exist
-        const RoleInstance = await role.findOne({ where: { id: $int(id) } });
+        const governmentInstance = await government.findOne({
+          where: { id: $int(id) },
+        });
 
-        if (!RoleInstance) {
-          errors.push("this role is not exist or maybe deleted !");
+        if (!governmentInstance) {
+          errors.push("this government is not exist or maybe deleted !");
           cover = helpers.restful({ type: 0, msg: 404 })(errors);
           return res.status(cover.code).json(cover);
         }
-        await RoleInstance.destroy();
+        await governmentInstance.destroy();
         cover = helpers.restful({ type: 1, msg: 200 })({
           message: "deleted successfully",
         });
@@ -158,5 +165,5 @@ const rolesController = ({ helpers, db }) => {
 };
 
 module.exports = ({ helpers, db }) => {
-  return rolesController({ helpers, db });
+  return govsController({ helpers, db });
 };
