@@ -1,6 +1,9 @@
 module.exports = ({ controllers, helpers, db, authMD }) => {
   const route = require("express").Router();
-  const { hospitals, auth, role, government } = controllers({ helpers, db });
+  const { hospitals, auth, role, government, user } = controllers({
+    helpers,
+    db,
+  });
 
   (async () => {
     route.post("/login", auth.login);
@@ -27,6 +30,12 @@ module.exports = ({ controllers, helpers, db, authMD }) => {
     route.delete("/hospitals", await authMD("admins"), hospitals.delete);
 
     // users area
+    route.get("/user", await authMD("superuser"), user.index);
+    route.get("/user/:id", await authMD("superuser"), user.find);
+    route.post("/user", await authMD("superuser"), user.create);
+    route.patch("/user", await authMD("superuser"), user.update);
+    route.delete("/user", await authMD("superuser"), user.delete);
+
   })().catch((e) => {
     console.log(e);
   });

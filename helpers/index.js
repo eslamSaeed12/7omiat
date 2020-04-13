@@ -6,4 +6,5 @@ module.exports = {
   restful: require("./Restful.helpers"),
   v: require("validator"),
   validators: require("../database/validators/index"),
+  uuid: require("uuid"),
 };

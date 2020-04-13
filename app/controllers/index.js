@@ -4,5 +4,6 @@ module.exports = ({ helpers, db }) => {
     auth: require("./auth.controller")({ helpers, db }),
     role: require("./roles.controller")({ helpers, db }),
     government: require("./governments.controller")({ helpers, db }),
+    user: require("./user.controller")({ helpers, db }),
   };
 };
