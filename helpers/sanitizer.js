@@ -15,7 +15,7 @@ class sanitizer {
   $int(int) {
     try {
       if (!int) throw new Error("int param is missing !");
-      if (!Number.isInteger(int)) return 0;
+     
       return Number.parseInt(int);
     } catch (e) {
       console.log(e);

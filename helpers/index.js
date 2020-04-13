@@ -5,4 +5,5 @@ module.exports = {
   sanitizer: require("./sanitizer"),
   restful: require("./Restful.helpers"),
   v: require("validator"),
+  validators: require("../database/validators/index"),
 };

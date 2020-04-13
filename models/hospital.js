@@ -9,19 +9,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       telephone: {
-        type: DataTypes.STRING,
+        type: DataTypes.INTEGER(11),
         allowNull: false,
       },
       fullDescription: {
         type: DataTypes.STRING,
         allowNull: false,
       },
-      latitude: {
-        type: DataTypes.DOUBLE,
-        allowNull: false,
-      },
-      longitude: {
-        type: DataTypes.DOUBLE,
+      coords: {
+        type: DataTypes.GEOMETRY("POINT"),
         allowNull: false,
       },
       gov_id: {
@@ -34,14 +30,6 @@ module.exports = (sequelize, DataTypes) => {
           onUpdate: "cascade",
         },
       },
-      addedBy: {
-        type: DataTypes.UUID,
-        allowNull: false,
-        references: {
-          model: "user",
-          key: "id",
-        },
-      },
     },
     {}
   );
@@ -51,11 +39,6 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "cascade",
       onUpdate: "cascade",
       foreignKey: "gov_id",
-    });
-    hospital.user = hospital.belongsTo(models.user, {
-      onDelete: "cascade",
-      onUpdate: "cascade",
-      foreignKey: "addedBy",
     });
   };
   return hospital;

@@ -3,8 +3,6 @@ module.exports = ({ controllers, helpers, db, authMD }) => {
   const { hospitals, auth, role, government } = controllers({ helpers, db });
 
   (async () => {
-    //route.get("/hold", await authMD("moderator"), hospitals.index);
-
     route.post("/login", auth.login);
 
     // roles area
@@ -20,7 +18,15 @@ module.exports = ({ controllers, helpers, db, authMD }) => {
     route.post("/gov", await authMD("admins"), government.create);
     route.patch("/gov", await authMD("admins"), government.update);
     route.delete("/gov", await authMD("admins"), government.delete);
-    
+
+    // hospitals
+    route.get("/hospitals", await authMD("admins"), hospitals.index);
+    route.get("/hospitals/:id", await authMD("admins"), hospitals.find);
+    route.post("/hospitals", await authMD("admins"), hospitals.create);
+    route.patch("/hospitals", await authMD("admins"), hospitals.update);
+    route.delete("/hospitals", await authMD("admins"), hospitals.delete);
+
+    // users area
   })().catch((e) => {
     console.log(e);
   });

@@ -14,19 +14,15 @@ module.exports = {
         allowNull: false,
       },
       telephone: {
-        type: Sequelize.STRING,
+        type: Sequelize.INTEGER(11),
         allowNull: false,
       },
       fullDescription: {
         type: Sequelize.STRING,
         allowNull: false,
       },
-      latitude: {
-        type: Sequelize.DOUBLE,
-        allowNull: false,
-      },
-      longitude: {
-        type: Sequelize.DOUBLE,
+      coords: {
+        type: Sequelize.GEOMETRY("POINT"),
         allowNull: false,
       },
       gov_id: {
@@ -37,14 +33,6 @@ module.exports = {
           key: "id",
           onDelete: "cascade",
           onUpdate: "cascade",
-        },
-      },
-      addedBy: {
-        type: Sequelize.UUID,
-        allowNull: false,
-        references: {
-          model: "users",
-          key: "id",
         },
       },
       createdAt: {
