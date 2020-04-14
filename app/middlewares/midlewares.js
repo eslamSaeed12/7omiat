@@ -11,9 +11,11 @@ const expressWinston = require("express-winston");
 const winston = require("winston");
 const winstonConfig = require("../../configs/logger")(winston);
 const guard = require("../core/guards.index");
+const db = require("../../models/index");
 const { dotenv, jwt } = helpers;
 
 (async () => {
+  const passport = await require("../../configs/passport")({ user: db.user });
   const authMD = (r) => {
     return require("./auth")({
       decode: jwt.decode,
@@ -22,7 +24,6 @@ const { dotenv, jwt } = helpers;
     });
   };
 
-  const db = require("../../models/index");
   app.use(helmet());
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded());
@@ -34,7 +35,8 @@ const { dotenv, jwt } = helpers;
   }
 
   app.use(connectId());
-  app.use(routes({ controllers, helpers, db, authMD }));
+  app.use(passport.initialize({ userProperty: false }));
+  app.use(routes({ controllers, helpers, db, authMD, passport }));
 
   if (dotenv("NODE_ENV") !== "development") {
     app.use(expressWinston.errorLogger(winstonConfig.error));

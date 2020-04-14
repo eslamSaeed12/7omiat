@@ -1,4 +1,4 @@
-module.exports = ({ controllers, helpers, db, authMD }) => {
+module.exports = ({ controllers, helpers, db, authMD, passport }) => {
   const route = require("express").Router();
   const { hospitals, auth, role, government, user } = controllers({
     helpers,
@@ -6,7 +6,36 @@ module.exports = ({ controllers, helpers, db, authMD }) => {
   });
 
   (async () => {
+
+
+    // auth area 
     route.post("/login", auth.login);
+    route.get(
+      "/auth/facebook",
+      passport.authenticate("facebook", { scope: "email" })
+    );
+    route.get(
+      "/auth/facebook/callback",
+      passport.authenticate("facebook", {
+        failureRedirect: "/login",
+        session: false,
+      }),
+      auth.facebookLogin
+    );
+
+    route.get(
+      "/auth/google",
+      passport.authenticate("google", { scope: "email" })
+    );
+
+    route.get(
+      "/auth/google/callback",
+      passport.authenticate("google", {
+        failureRedirect: "/login",
+        session: false,
+      }),
+      auth.googleLogin
+    );
 
     // roles area
     route.get("/role", await authMD("admins"), role.index);
@@ -35,7 +64,6 @@ module.exports = ({ controllers, helpers, db, authMD }) => {
     route.post("/user", await authMD("superuser"), user.create);
     route.patch("/user", await authMD("superuser"), user.update);
     route.delete("/user", await authMD("superuser"), user.delete);
-
   })().catch((e) => {
     console.log(e);
   });
