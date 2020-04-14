@@ -1,5 +1,12 @@
 const authController = ({ helpers, db }) => {
   return {
+    csrf(req, res, next) {
+      try {
+        res.status(200).json({ _csrf: req.csrfToken() });
+      } catch (e) {
+        return next(e);
+      }
+    },
     async login(req, res, next) {
       try {
         const { email, password } = req.body;

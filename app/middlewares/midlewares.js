@@ -9,10 +9,12 @@ const connectId = require("connect-rid");
 const morgan = require("morgan");
 const expressWinston = require("express-winston");
 const winston = require("winston");
+const csrf = require("csurf");
 const winstonConfig = require("../../configs/logger")(winston);
 const guard = require("../core/guards.index");
 const db = require("../../models/index");
 const { dotenv, jwt } = helpers;
+const cookieParser = require("cookie-parser")({ secret: dotenv("secret") });
 
 (async () => {
   const passport = await require("../../configs/passport")({ user: db.user });
@@ -25,6 +27,8 @@ const { dotenv, jwt } = helpers;
   };
 
   app.use(helmet());
+  app.use(cookieParser)
+  app.use(csrf({ cookie: true }));
   app.use(bodyParser.json());
   app.use(bodyParser.urlencoded());
 

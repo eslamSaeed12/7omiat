@@ -6,10 +6,9 @@ module.exports = ({ controllers, helpers, db, authMD, passport }) => {
   });
 
   (async () => {
-
-
-    // auth area 
-    route.post("/login", auth.login);
+    // auth area
+    route.get("/auth/token", auth.csrf);
+    route.post("/auth/login", auth.login);
     route.get(
       "/auth/facebook",
       passport.authenticate("facebook", { scope: "email" })
