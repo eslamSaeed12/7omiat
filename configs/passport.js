@@ -28,7 +28,6 @@ module.exports = ({ user }) => {
     new googleSt(
       googleOauthConfig,
       async (accessToken, refreshToken, profile, done) => {
-        console.log(profile)
         const { emails } = profile;
         const userInstance = await user.findOne({
           where: { email: emails[0].value || "" },

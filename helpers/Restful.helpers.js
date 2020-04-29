@@ -42,14 +42,14 @@ module.exports = ({ type, msg }) => {
       },
       201: (data) => {
         return {
-          code: 201,
+          code: 200,
           message: "Created",
           data,
         };
       },
       302: (data) => {
         return {
-          code: 302,
+          code: 200,
           message: "Found",
           data,
         };

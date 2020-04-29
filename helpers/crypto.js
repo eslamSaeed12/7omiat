@@ -1,4 +1,6 @@
 const $crypto = require("crypto-js");
+const nodeCrypto = require("crypto");
+
 class crypto {
   hash(key) {
     try {
@@ -9,6 +11,10 @@ class crypto {
     } catch (e) {
       console.log(e);
     }
+  }
+
+  randomBytes(num = 32) {
+    return nodeCrypto.randomBytes(num).toString("hex");
   }
 }
 

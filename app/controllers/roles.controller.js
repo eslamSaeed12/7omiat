@@ -6,13 +6,7 @@ const rolesController = ({ helpers, db }) => {
         const { role } = db;
         let cover;
         const roles = await role.findAll();
-        if (!roles.length) {
-          cover = helpers.restful({ type: 0, msg: 404 })([
-            "no roles added in database yet",
-          ]);
-          return res.status(cover.code).json(cover);
-        }
-        cover = helpers.restful({ type: 1, msg: 302 })(roles);
+        cover = helpers.restful({ type: 1, msg: 200 })(roles || "");
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -50,8 +44,8 @@ const rolesController = ({ helpers, db }) => {
           errors.push("title is missing");
         }
 
-        if (!v.isLength(title || "", { min: 6, max: 18 })) {
-          errors.push("title should at least 6 chars and at maxmimum 18");
+        if (!v.isLength(title || "", { min: 4, max: 18 })) {
+          errors.push("title should at least 4 chars and at maxmimum 18");
         }
 
         // unqiueness
@@ -77,7 +71,7 @@ const rolesController = ({ helpers, db }) => {
     async update(req, res, next) {
       try {
         const { id, title } = req.body;
-        const { sanitizer } = helpers;
+        const { sanitizer, v } = helpers;
         const { $str, $int } = sanitizer;
         const { role } = db;
         const errors = [];
@@ -100,14 +94,14 @@ const rolesController = ({ helpers, db }) => {
           errors.push("title is required !");
         }
 
-        if (String(title)) {
+        if (!String(title)) {
           errors.push("title should only string !");
         }
 
-        if (!v.isLength(title || "", { min: 6, max: 18 })) {
-          errors.push("title should at least 6 chars and at maxmimum 18");
+        if (!v.isLength(title || "", { min: 4, max: 18 })) {
+          errors.push("title should at least 4 chars and at maxmimum 18");
         }
-        
+
         // check if unique
         const uniqueRole = await role.findOne({
           where: { title: $str(title), [Op.not]: { id: $int(id) } },
@@ -115,10 +109,15 @@ const rolesController = ({ helpers, db }) => {
 
         if (uniqueRole) errors.push("title is exist try another one");
 
-        RoleInstance.title = $str(title);
-        await RoleInstance.save();
-        await RoleInstance.reload();
-        cover = helpers.restful({ type: 1, msg: 200 })(RoleInstance);
+        if (!errors) {
+          RoleInstance.title = $str(title);
+          await RoleInstance.save();
+          await RoleInstance.reload();
+          cover = helpers.restful({ type: 1, msg: 200 })(RoleInstance);
+          return res.status(cover.code).json(cover);
+        }
+        cover = helpers.restful({ type: 0, msg: 400 })([...errors]);
+
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -127,8 +126,6 @@ const rolesController = ({ helpers, db }) => {
     async delete(req, res, next) {
       try {
         const { id } = req.body;
-        const { sanitizer } = helpers;
-        const { $int } = sanitizer;
         const { role } = db;
         const errors = [];
         let cover;
@@ -137,8 +134,9 @@ const rolesController = ({ helpers, db }) => {
           errors.push("id is required !");
         }
 
+        console.log(req.body);
         // check if exist
-        const RoleInstance = await role.findOne({ where: { id: $int(id) } });
+        const RoleInstance = await role.findOne({ where: { id: Number(id) } });
 
         if (!RoleInstance) {
           errors.push("this role is not exist or maybe deleted !");

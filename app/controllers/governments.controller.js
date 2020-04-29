@@ -5,14 +5,10 @@ const govsController = ({ helpers, db }) => {
       try {
         const { government } = db;
         let cover;
-        const governments = await government.findAll();
-        if (!governments.length) {
-          cover = helpers.restful({ type: 0, msg: 404 })([
-            "no governments added in database yet",
-          ]);
-          return res.status(cover.code).json(cover);
-        }
-        cover = helpers.restful({ type: 1, msg: 302 })(governments);
+        const governments = await government.findAll({
+          include: ["creator", "updator"],
+        });
+        cover = helpers.restful({ type: 1, msg: 200 })(governments || []);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -40,7 +36,7 @@ const govsController = ({ helpers, db }) => {
     },
     async create(req, res, next) {
       try {
-        const { name } = req.body;
+        const { name, created_by } = req.body;
         const { v, sanitizer } = helpers;
         const { $str } = sanitizer;
         const { government } = db;
@@ -50,7 +46,13 @@ const govsController = ({ helpers, db }) => {
           errors.push("name is required !");
         }
 
-        if (!v.isLength(name || "", { min: 4, max: 18 })) {
+        if (!created_by) {
+          errors.push("created_by is required");
+        }
+        if (!v.isUUID(created_by)) {
+          errors.push("created_by should only uuid");
+        }
+        if (!v.isLength(name || "", { min: 6, max: 18 })) {
           errors.push("name should at least 6 chars and at maxmimum 18");
         }
 
@@ -67,6 +69,7 @@ const govsController = ({ helpers, db }) => {
 
         const newgovernment = await government.create({
           name: $str(name),
+          created_by: created_by,
         });
 
         cover = helpers.restful({ type: 1, msg: 201 })(newgovernment);
@@ -79,8 +82,8 @@ const govsController = ({ helpers, db }) => {
 
     async update(req, res, next) {
       try {
-        const { id, name } = req.body;
-        const { sanitizer } = helpers;
+        const { id, name, created_by, updated_by } = req.body;
+        const { sanitizer, v } = helpers;
         const { $str, $int } = sanitizer;
         const { government } = db;
         const errors = [];
@@ -105,7 +108,33 @@ const govsController = ({ helpers, db }) => {
           errors.push("name is required !");
         }
 
-        if (String(name)) {
+        if (!created_by) errors.push("created_by is required");
+        if (!updated_by) errors.push("updated_by is required");
+
+        if (!v.isUUID(created_by)) {
+          errors.push("created_by should onyl uuid");
+        }
+
+        if (!v.isUUID(updated_by)) {
+          errors.push("updated_by should onyl uuid");
+        }
+
+        const created_bySearcher = await db.user.findOne({
+          where: { id: created_by },
+        });
+
+        if (!created_bySearcher) {
+          errors.push(`created_by : no user with this id ${created_by}`);
+        }
+        const updated_bySearcher = await db.user.findOne({
+          where: { id: updated_by },
+        });
+
+        if (!updated_bySearcher) {
+          errors.push(`updated_by : no user with this id ${updated_by}`);
+        }
+
+        if (!String(name)) {
           errors.push("name should only string !");
         }
 
@@ -120,10 +149,16 @@ const govsController = ({ helpers, db }) => {
 
         if (uniquegovernment) errors.push("name is exist try another one");
 
-        governmentInstance.name = $str(name);
-        await governmentInstance.save();
-        await governmentInstance.reload();
-        cover = helpers.restful({ type: 1, msg: 200 })(governmentInstance);
+        if (!errors.length) {
+          governmentInstance.name = $str(name);
+          governmentInstance.created_by = created_by;
+          governmentInstance.updated_by = updated_by;
+          await governmentInstance.save();
+          await governmentInstance.reload();
+          cover = helpers.restful({ type: 1, msg: 200 })(governmentInstance);
+          return res.status(cover.code).json(cover);
+        }
+        cover = helpers.restful({ type: 0, msg: 400 })([...errors]);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);

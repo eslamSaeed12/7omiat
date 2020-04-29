@@ -45,6 +45,22 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: new Date(),
       },
+      created_by: {
+        allowNull: false,
+        type: Sequelize.UUID,
+        references: {
+          model: "users",
+          key: "id",
+        },
+      },
+      updated_by: {
+        allowNull: true,
+        type: Sequelize.UUID,
+        references: {
+          model: "users",
+          key: "id",
+        },
+      },
     });
   },
   down: (queryInterface, Sequelize) => {

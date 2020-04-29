@@ -24,7 +24,9 @@ class jwtHelper {
 
       return jwt.verify(token, secret);
     } catch (e) {
+      if (e.message === "invalid token") return false;
       if (e.message === "invalid signature") return false;
+      if (e.message === "jwt malformed") return false;
       else console.log(e);
     }
   }

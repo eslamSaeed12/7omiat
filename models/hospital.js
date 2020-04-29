@@ -30,6 +30,22 @@ module.exports = (sequelize, DataTypes) => {
           onUpdate: "cascade",
         },
       },
+      created_by: {
+        allowNull: false,
+        type: DataTypes.UUID,
+        references: {
+          model: "user",
+          key: "id",
+        },
+      },
+      updated_by: {
+        allowNull: false,
+        type: DataTypes.UUID,
+        references: {
+          model: "user",
+          key: "id",
+        },
+      },
     },
     {}
   );
@@ -40,6 +56,19 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: "cascade",
       foreignKey: "gov_id",
     });
+
+    hospital.creator = hospital.belongsTo(models.user, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+      foreignKey: "created_by",
+    });
+
+    hospital.updator = hospital.belongsTo(models.user, {
+      onDelete: "cascade",
+      onUpdate: "cascade",
+      foreignKey: "updated_by",
+    });
+    
   };
   return hospital;
 };

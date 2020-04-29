@@ -6,14 +6,10 @@ const hospitalsController = ({ helpers, db }) => {
       try {
         const { hospital } = db;
         let cover;
-        const hospitals = await hospital.findAll({ include: "government" });
-        if (!hospitals.length) {
-          cover = helpers.restful({ type: 0, msg: 404 })([
-            "no hospitals added in database yet",
-          ]);
-          return res.status(cover.code).json(cover);
-        }
-        cover = helpers.restful({ type: 1, msg: 302 })(hospitals);
+        const hospitals = await hospital.findAll({
+          include: ["government", "user"],
+        });
+        cover = helpers.restful({ type: 1, msg: 302 })(hospitals || []);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);

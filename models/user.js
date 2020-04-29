@@ -7,9 +7,13 @@ module.exports = (sequelize, DataTypes) => {
       email: { type: DataTypes.STRING, allowNull: false },
       password: { type: DataTypes.STRING, allowNull: false },
       role_id: { type: DataTypes.INTEGER, allowNull: false },
-      remember_me: { type: DataTypes.STRING },
     },
-    {}
+    {
+      name: {
+        plural: "users",
+        singualr: "user",
+      },
+    }
   );
   user.associate = function (models) {
     // associations can be defined here
@@ -18,6 +22,7 @@ module.exports = (sequelize, DataTypes) => {
       onDelete: "cascade",
       foreignKey: "role_id",
     });
+    
   };
   return user;
 };

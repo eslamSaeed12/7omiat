@@ -4,20 +4,25 @@ module.exports = ({ decode, guard, dotenv }) => {
       //jwt token of the request
       const { token } = req.headers;
 
-      if (!token) return res.redirect("/"); // redirect to the unauthoriezed endpoint
+      if (!token) return res.json({ message: "unAuthorized" }); // redirect to the unauthoriezed endpoint
 
       const id = decode(token, dotenv("secret")).id;
 
-      if (!id) return res.redirect("/"); // redirect to the unauthoriezed endpoint
+      if (!Boolean(id))
+        return res.status(401).json({ message: "unAuthorized" }); // redirect to the unauthoriezed endpoint
 
       const guardGate = await guard({ id });
 
-      if (!guardGate) return res.redirect("/"); // redirect to the unauthoriezed endpoint
+      if (!guardGate)
+        return res
+          .status(403)
+          .json({ message: "you dont have the permisions" }); // redirect to the unauthoriezed endpoint
 
       req.auth = guardGate;
       return next();
     } catch (e) {
-      console.log(e);
+      if (dotenv("NODE_ENV") === "development") console.log(e);
+      return res.status(500).json({ message: "intern server error" });
     }
   };
 };

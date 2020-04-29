@@ -6,13 +6,7 @@ const usersController = ({ helpers, db }) => {
         const { user } = db;
         let cover;
         const users = await user.findAll({ include: "role" });
-        if (!users.length) {
-          cover = helpers.restful({ type: 0, msg: 404 })([
-            "no users added in database yet",
-          ]);
-          return res.status(cover.code).json(cover);
-        }
-        cover = helpers.restful({ type: 1, msg: 302 })(users);
+        cover = helpers.restful({ type: 1, msg: 302 })(users || []);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -24,10 +18,10 @@ const usersController = ({ helpers, db }) => {
         const { id } = req.params;
         let cover;
         const $user = await user.findOne({
-          where: { id: helpers.sanitizer.$int(id) },
+          where: { id: helpers.sanitizer.$str(id) },
           include: "role",
         });
-        if (!$role) {
+        if (!$user) {
           cover = helpers.restful({ type: 0, msg: 404 })(
             "maybe this user deleted or not exist"
           );

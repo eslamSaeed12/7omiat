@@ -1,22 +1,24 @@
-module.exports = ({ controllers, helpers, db, authMD, passport }) => {
+module.exports = ({ controllers, helpers, db, authMD, passport, client }) => {
   const route = require("express").Router();
   const { hospitals, auth, role, government, user } = controllers({
     helpers,
     db,
+    client,
   });
 
   (async () => {
     // auth area
-    route.get("/auth/token", auth.csrf);
     route.post("/auth/login", auth.login);
     route.get(
       "/auth/facebook",
-      passport.authenticate("facebook", { scope: "email" })
+      passport.authenticate("facebook", {
+        scope: "email",
+      })
     );
     route.get(
       "/auth/facebook/callback",
       passport.authenticate("facebook", {
-        failureRedirect: "/login",
+        failureRedirect: "http://localhost:3000/panel/login",
         session: false,
       }),
       auth.facebookLogin
@@ -24,17 +26,23 @@ module.exports = ({ controllers, helpers, db, authMD, passport }) => {
 
     route.get(
       "/auth/google",
-      passport.authenticate("google", { scope: "email" })
+      passport.authenticate("google", {
+        scope: "email",
+      })
     );
 
     route.get(
       "/auth/google/callback",
       passport.authenticate("google", {
-        failureRedirect: "/login",
+        failureRedirect: "http://localhost:3000/panel/login",
         session: false,
       }),
       auth.googleLogin
     );
+
+    route.post("/auth", await authMD("admins"), (req, res) => {
+      res.status(200).json({ message: "valid" });
+    });
 
     // roles area
     route.get("/role", await authMD("admins"), role.index);
