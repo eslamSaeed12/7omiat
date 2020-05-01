@@ -7,17 +7,8 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const connectId = require("connect-rid");
 const morgan = require("morgan");
-const expressWinston = require("express-winston");
-const winston = require("winston");
-const winstonConfig = require("../../configs/logger")(winston);
 const guard = require("../core/guards.index");
 const db = require("../../models/index");
-const redis = require("redis");
-const client = redis.createClient();
-
-client.on("error", (e) => {
-  console.error(e);
-});
 
 const { dotenv, jwt } = helpers;
 const cookieParser = require("cookie-parser");
@@ -35,7 +26,7 @@ const cors = require("cors");
       dotenv,
     });
   };
-  
+
   app.use(helmet());
   app.use(
     cookieParser({
@@ -55,9 +46,21 @@ const cors = require("cors");
     })
   );
   if (dotenv("NODE_ENV") === "development") {
+    const fs = require("fs");
     app.use(morgan("dev"));
-  } else {
-    app.use(expressWinston.logger(winstonConfig.http));
+  }
+  if (dotenv("NODE_ENV") !== "development") {
+    app.use(
+      morgan((tokens, req, res) => {
+        const httpLogger = helpers.logger("./logs/http.log");
+        httpLogger.addRecord({
+          url: tokens.url(req, res),
+          status: tokens.status(req, res),
+          content_length: tokens.res(req, res, "content-length"),
+          res_time: tokens["response-time"](req, res) + "ms",
+        });
+      })
+    );
   }
   app.use(connectId());
   app.use(
@@ -72,13 +75,24 @@ const cors = require("cors");
       db,
       authMD,
       passport,
-      client,
     })
   );
 
   if (dotenv("NODE_ENV") !== "development") {
-    app.use(expressWinston.errorLogger(winstonConfig.error));
+    app.use(($error, req, res, next) => {
+      const errorLogger = helpers.errorLogger("./logs/error.log");
+      errorLogger.addRecord({
+        name: $error.name,
+        message: $error.message,
+        stack: $error.stack,
+      });
+      return res.status(500).json("something went wrong , we will fix it soon");
+    });
   }
+  app.use(($err, req, res, next) => {
+    console.log($err);
+    res.end();
+  });
 })().catch((e) => console.log(e));
 
 module.exports = app;

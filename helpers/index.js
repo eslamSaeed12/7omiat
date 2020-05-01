@@ -7,4 +7,6 @@ module.exports = {
   v: require("validator"),
   validators: require("../database/validators/index"),
   uuid: require("uuid"),
+  logger: require('./looger'),
+  errorLogger: require('./errorLogger')
 };

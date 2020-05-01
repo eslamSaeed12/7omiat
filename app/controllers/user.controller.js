@@ -35,17 +35,17 @@ const usersController = ({ helpers, db }) => {
     },
     async create(req, res, next) {
       try {
-        const { username, email, password, remember_me, role_id } = req.body;
+        const { username, email, password, role_id } = req.body;
         const { sanitizer, restful, crypto, uuid } = helpers;
         const { $str, $int } = sanitizer;
         const { role, user } = db;
         let cover;
 
-        const userValidator = helpers.validators.user({
-          username: $str(username),
-          email: $str(email),
-          password: $str(password),
-          role_id: $int(role_id),
+        const userValidator = helpers.validators.user(true, {
+          username: $str(username) || "",
+          email: $str(email) || "",
+          password: $str(password) || "",
+          role_id: $int(role_id) || null,
         });
 
         // here validate the model all
@@ -62,10 +62,9 @@ const usersController = ({ helpers, db }) => {
         });
 
         if (!roleCheck) {
-          cover = helpers.restful({ type: 0, msg: 404 })({
-            message: "this role is not exist or maybe deleted !",
-            field: "id",
-          });
+          cover = helpers.restful({ type: 0, msg: 404 })([
+            "this role is not exist or maybe deleted !",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -76,10 +75,9 @@ const usersController = ({ helpers, db }) => {
         });
 
         if (usernameCheck) {
-          cover = helpers.restful({ type: 0, msg: 400 })({
-            message: "this username is exist!",
-            field: "username",
-          });
+          cover = helpers.restful({ type: 0, msg: 400 })([
+            "this username is exist!",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -89,10 +87,9 @@ const usersController = ({ helpers, db }) => {
         });
 
         if (emailCheck) {
-          cover = helpers.restful({ type: 0, msg: 400 })({
-            message: "this email is exist!",
-            field: "email",
-          });
+          cover = helpers.restful({ type: 0, msg: 400 })([
+            "this email is exist!",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -112,26 +109,14 @@ const usersController = ({ helpers, db }) => {
 
     async update(req, res, next) {
       try {
-        const {
-          id,
-          username,
-          email,
-          password,
-          newPassword,
-          remember_me,
-          role_id,
-        } = req.body;
+        const { id, username, email, password, role_id } = req.body;
         const { sanitizer, restful, crypto, uuid } = helpers;
         const { $str, $int } = sanitizer;
         const { role, user } = db;
         let cover;
-
         // check for the user exsit or not
         if (!id) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "user id is required",
-            field: "id",
-          });
+          cover = restful({ type: 0, msg: 400 })(["user id is required"]);
           return res.status(cover.code).json(cover);
         }
 
@@ -140,9 +125,9 @@ const usersController = ({ helpers, db }) => {
         });
 
         if (!awaitedUser) {
-          cover = helpers.restful({ type: 0, msg: 404 })({
-            message: "this user is not exist",
-          });
+          cover = helpers.restful({ type: 0, msg: 404 })([
+            "this user is not exist",
+          ]);
 
           return res.status(cover.code).json(cover);
         }
@@ -151,6 +136,7 @@ const usersController = ({ helpers, db }) => {
 
         const userValidator = helpers.validators.user;
         let validateduser;
+
         if (password === awaitedUser.password) {
           validateduser = userValidator(false, {
             username: username ? $str(username) : awaitedUser.username,
@@ -183,10 +169,9 @@ const usersController = ({ helpers, db }) => {
         });
 
         if (uniqueUserName) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "username is exist try another one",
-            field: "username",
-          });
+          cover = restful({ type: 0, msg: 400 })([
+            "username is exist try another one",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -199,10 +184,9 @@ const usersController = ({ helpers, db }) => {
         });
 
         if (uniqueEmail) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "email is exist try another one",
-            field: "email",
-          });
+          cover = restful({ type: 0, msg: 400 })([
+            "email is exist try another one",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -210,16 +194,20 @@ const usersController = ({ helpers, db }) => {
 
         if (password !== awaitedUser.password) {
           await awaitedUser.update({
-            ...validateduser,
+            ...validateduser.value,
             updatedAt: new Date(),
             password: crypto.hash(validateduser.value.password),
           });
         }
 
         if (password === awaitedUser.password) {
-          await awaitedUser.update({ ...validateduser, updatedAt: new Date() });
+          await awaitedUser.update({
+            ...validateduser.value,
+            updatedAt: new Date(),
+          });
         }
 
+        awaitedUser.updatedAt = new Date();
         await awaitedUser.save();
         await awaitedUser.reload();
 
