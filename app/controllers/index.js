@@ -1,6 +1,7 @@
 module.exports = ({ helpers, db }) => {
   return {
     logs: require("./logs.controller")({ helpers }),
+    errors: require("./errors.controller")({ helpers }),
     hospitals: require("./hospitals.controller")({
       helpers,
       db,

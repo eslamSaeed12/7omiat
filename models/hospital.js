@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       updated_by: {
-        allowNull: false,
+        allowNull: true,
         type: DataTypes.UUID,
         references: {
           model: "user",
@@ -68,7 +68,6 @@ module.exports = (sequelize, DataTypes) => {
       onUpdate: "cascade",
       foreignKey: "updated_by",
     });
-    
   };
   return hospital;
 };

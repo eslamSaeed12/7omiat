@@ -10,7 +10,10 @@ const morgan = require("morgan");
 const guard = require("../core/guards.index");
 const db = require("../../models/index");
 
-const { dotenv, jwt } = helpers;
+const {
+  dotenv,
+  jwt
+} = helpers;
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
@@ -89,10 +92,6 @@ const cors = require("cors");
       return res.status(500).json("something went wrong , we will fix it soon");
     });
   }
-  app.use(($err, req, res, next) => {
-    console.log($err);
-    res.end();
-  });
 })().catch((e) => console.log(e));
 
 module.exports = app;

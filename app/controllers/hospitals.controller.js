@@ -37,9 +37,16 @@ const hospitalsController = ({ helpers, db }) => {
     },
     async create(req, res, next) {
       try {
-        const { name, telephone, fullDescription, coords, gov_id } = req.body;
+        const {
+          name,
+          telephone,
+          fullDescription,
+          coords,
+          gov_id,
+          created_by,
+        } = req.body;
 
-        const { sanitizer, restful } = helpers;
+        const { sanitizer, restful, v } = helpers;
         const { $str, $int } = sanitizer;
         let cover;
         const { hospital, government } = db;
@@ -65,10 +72,9 @@ const hospitalsController = ({ helpers, db }) => {
         });
 
         if (uniqueTitle) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "this name is exist try another title",
-            field: "name",
-          });
+          cover = restful({ type: 0, msg: 400 })([
+            "this name is exist try another title",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -78,13 +84,16 @@ const hospitalsController = ({ helpers, db }) => {
         });
 
         if (!validatedGov) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "this government is not exist or maybe deleted",
-            field: "gov_id",
-          });
+          cover = restful({ type: 0, msg: 400 })([
+            "this government is not exist or maybe deleted",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
+        if (!created_by) {
+          cover = restful({ type: 0, msg: 400 })(["createdBy is required"]);
+          return res.status(cover.code).json(cover);
+        }
         // now create the hospital
         const newHospital = await hospital.create({
           name: validatedHospital.value.name,
@@ -92,6 +101,7 @@ const hospitalsController = ({ helpers, db }) => {
           fullDescription: validatedHospital.value.fullDescription,
           coords: validatedHospital.value.coords,
           gov_id: $int(gov_id),
+          created_by: $str(created_by),
         });
 
         cover = restful({ type: 1, msg: 201 })(newHospital);
@@ -109,6 +119,7 @@ const hospitalsController = ({ helpers, db }) => {
           fullDescription,
           coords,
           gov_id,
+          updated_by,
         } = req.body;
 
         const { sanitizer, restful } = helpers;
@@ -117,10 +128,9 @@ const hospitalsController = ({ helpers, db }) => {
         let cover;
 
         if (!id) {
-          cover = restful({ type: 0, msg: 404 })({
-            message: "this hospital id is required",
-            field: "id",
-          });
+          cover = restful({ type: 0, msg: 404 })([
+            "this hospital id is required",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
@@ -131,10 +141,9 @@ const hospitalsController = ({ helpers, db }) => {
         });
 
         if (!awaitedHospital) {
-          cover = helpers.restful({ type: 0, msg: 404 })({
-            message: "this hospital is not exist",
-            field: "id",
-          });
+          cover = helpers.restful({ type: 0, msg: 404 })([
+            "this hospital is not exist",
+          ]);
 
           return res.status(cover.code).json(cover);
         }
@@ -168,10 +177,7 @@ const hospitalsController = ({ helpers, db }) => {
         });
 
         if (!awaitedGov) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "governament is not exist",
-            field: "gov_id",
-          });
+          cover = restful({ type: 0, msg: 400 })(["governament is not exist"]);
           return res.status(cover.code).json(cover);
         }
 
@@ -181,15 +187,27 @@ const hospitalsController = ({ helpers, db }) => {
         });
 
         if (uniqueHosptial) {
-          cover = restful({ type: 0, msg: 400 })({
-            message: "hospital name is exist try another one",
-            field: "name",
-          });
+          cover = restful({ type: 0, msg: 400 })([
+            "hospital name is exist try another one",
+          ]);
           return res.status(cover.code).json(cover);
         }
 
+        const userUpdatedBy = db.user.findOne({
+          where: { id: $str(updated_by) },
+        });
+        if (!userUpdatedBy) {
+          cover = restful({ type: 0, msg: 400 })([
+            "updated_by user is not exist",
+          ]);
+          return res.status(cover.code).json(cover);
+        }
         // no problem with unqiue
-        await awaitedHospital.update({ ...validatedHospital.value });
+        await awaitedHospital.update({
+          ...validatedHospital.value,
+          updated_by: $str(updated_by) || null,
+        });
+
         await awaitedHospital.save();
         await awaitedHospital.reload();
 

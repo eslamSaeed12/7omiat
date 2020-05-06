@@ -2,7 +2,7 @@ const joi = require("joi");
 
 const hospitalSchema = joi.object({
   name: joi.string().required().max(255).min(8),
-  telephone: joi.string().length(9).required(),
+  telephone: joi.string().min(6).max(11).required(),
   fullDescription: joi.string().required().max(255).min(8),
   coords: joi
     .object()

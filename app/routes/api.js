@@ -1,9 +1,11 @@
 module.exports = ({ controllers, helpers, db, authMD, passport }) => {
   const route = require("express").Router();
-  const { hospitals, auth, role, government, user, logs } = controllers({
-    helpers,
-    db,
-  });
+  const { hospitals, auth, role, government, user, logs, errors } = controllers(
+    {
+      helpers,
+      db,
+    }
+  );
 
   (async () => {
     // auth area
@@ -40,6 +42,7 @@ module.exports = ({ controllers, helpers, db, authMD, passport }) => {
     );
 
     route.post("/auth", await authMD("admins"), (req, res) => {
+      console.log(req.headers['token'])
       res.status(200).json({
         message: "valid",
       });
@@ -74,9 +77,14 @@ module.exports = ({ controllers, helpers, db, authMD, passport }) => {
     route.delete("/user", await authMD("superuser"), user.delete);
 
     // logs area
-    route.get("/logs/:id", await authMD("admins"), logs.find);
     route.get("/logs", await authMD("admins"), logs.index);
+    route.get("/logs/:id", await authMD("admins"), logs.find);
     route.delete("/logs", await authMD("admins"), logs.delete);
+
+    // logs area
+    route.get("/errors", await authMD("admins"), errors.index);
+    route.get("/errors/:id", await authMD("admins"), errors.find);
+    route.delete("/errors", await authMD("admins"), errors.delete);
     
   })().catch((e) => {
     console.log(e);
