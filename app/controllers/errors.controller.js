@@ -50,7 +50,7 @@ module.exports = ({ helpers }) => {
         const checkForID = loggerHelper.find({ id: sanitizer.$str(id) });
         if (!checkForID) {
           cover = restful({ type: 1, msg: 200 })([
-            "item is not exist or maybe delted ",
+            "item is not exist or maybe delثted ",
           ]);
           return res.status(cover.code).json(cover);
         }

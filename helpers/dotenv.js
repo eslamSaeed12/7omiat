@@ -6,15 +6,10 @@ class dotenv {
   }
 
   find(key) {
-    try {
-      if (!key) throw new Error("key param is missing !");
-      if (typeof key !== "string")
-        throw new Error("key param should only string");
-      if (!process.env[key]) throw new Error("key not exist");
-      return process.env[key]
-    } catch (e) {
-      console.log(e);
-    }
+    if (!key) throw Error("key param is missing !");
+    if (typeof key !== "string") throw Error("key param should only string");
+    if (!process.env[key]) throw Error("key not exist");
+    return process.env[key];
   }
 }
 

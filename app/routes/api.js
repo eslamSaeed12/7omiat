@@ -1,9 +1,10 @@
-module.exports = ({ controllers, helpers, db, authMD, passport }) => {
+module.exports = ({ controllers, helpers, db, authMD, passport, gates }) => {
   const route = require("express").Router();
   const { hospitals, auth, role, government, user, logs, errors } = controllers(
     {
       helpers,
       db,
+      gates,
     }
   );
 
@@ -42,7 +43,7 @@ module.exports = ({ controllers, helpers, db, authMD, passport }) => {
     );
 
     route.post("/auth", await authMD("admins"), (req, res) => {
-      console.log(req.headers['token'])
+      console.log(req.headers["token"]);
       res.status(200).json({
         message: "valid",
       });
@@ -85,7 +86,6 @@ module.exports = ({ controllers, helpers, db, authMD, passport }) => {
     route.get("/errors", await authMD("admins"), errors.index);
     route.get("/errors/:id", await authMD("admins"), errors.find);
     route.delete("/errors", await authMD("admins"), errors.delete);
-    
   })().catch((e) => {
     console.log(e);
   });

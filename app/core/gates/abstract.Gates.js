@@ -13,13 +13,9 @@ class gate {
     if (!typeof cb === "function")
       throw Error("define policy allows callback to be function ");
 
-    if (!policyName) {
-      throw Error("policy name is required");
-    }
+    if (!this.isValidPolicy({ policyName }))
+      throw Error("policy name is not valid");
 
-    if (typeof policyName !== "string") {
-      throw Error("policy name should only string");
-    }
     this.policies[policyName] = cb;
 
     return Boolean(this.policies[policyName]);

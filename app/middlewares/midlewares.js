@@ -9,11 +9,8 @@ const connectId = require("connect-rid");
 const morgan = require("morgan");
 const guard = require("../core/guards.index");
 const db = require("../../models/index");
-
-const {
-  dotenv,
-  jwt
-} = helpers;
+const gates = require("../core/gates.container");
+const { dotenv, jwt } = helpers;
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
@@ -78,6 +75,7 @@ const cors = require("cors");
       db,
       authMD,
       passport,
+      gates,
     })
   );
 
