@@ -5,6 +5,7 @@ class policies {
         throw Error("policies should only functions");
       }
       this[i] = args[i];
+      return true;
     }
   }
 }

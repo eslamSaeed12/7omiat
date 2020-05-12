@@ -10,36 +10,29 @@ class gate {
   }
 
   define(policyName, cb) {
-    if (!typeof cb === "function")
-      throw Error("define policy allows callback to be function ");
+    if (!policyName) throw Error("policy name is required");
 
-    if (!this.isValidPolicy({ policyName }))
-      throw Error("policy name is not valid");
+    if (typeof policyName !== "string")
+      throw Error("policy name should only string");
+
+    if (typeof cb !== "function")
+      throw Error("define policy allows callback to be function");
 
     this.policies[policyName] = cb;
 
     return Boolean(this.policies[policyName]);
   }
 
-  isValidPolicy({ policyName }) {
-    if (!policyName) {
-      throw Error("policy name is required");
-    }
+  can(policyName, ...args) {
+    if (!policyName) throw Error("policy name is required");
 
-    if (typeof policyName !== "string") {
+    if (typeof policyName !== "string")
       throw Error("policy name should only string");
-    }
-
-    return true;
-  }
-  can(policyName, { ...args }) {
-    if (!this.isValidPolicy({ policyName }))
-      throw Error("policy name is not valid");
 
     if (!this.policies[policyName])
       throw Error("policy is not valid or maybe not defined");
 
-    return Boolean(this.policies[policyName]({ ...args }));
+    return Boolean(this.policies[policyName](...args));
   }
 }
 
