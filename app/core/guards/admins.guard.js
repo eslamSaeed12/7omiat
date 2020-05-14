@@ -2,11 +2,13 @@ const AbstractGuard = require("./abstract_guard");
 class guard extends AbstractGuard {
   constructor({ id }) {
     try {
+    /*  if(!id) throw Error('id is required');
+      if(typeof id !=="string")*/
       super();
       this.role = ["superuser", "moderator"];
       return this.isAuthenticated({ id });
     } catch (e) {
-      console.log(e);
+      process.env.NODE_ENV === "development" ? console.log(e) : null;
     }
   }
 }

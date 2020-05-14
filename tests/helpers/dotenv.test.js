@@ -16,5 +16,4 @@ describe("dotenv errors", () => {
   test("dotenv key not exist", () => {
     expect(() => dotenv("not valid key")).toThrow("key not exist");
   });
-  
 });

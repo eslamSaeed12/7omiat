@@ -1,13 +1,32 @@
 class gaurd {
   constructor() {
+
     this._ = require("lodash");
-    this.roles = require("../../../configs/roles.enums.json");
+
+    const enums = require("../../../configs/roles.enums.json");
+
+    if (!Array.isArray(enums)) throw Error("enums should be array");
+
+    if (!enums.length) throw Error("enums roles array empty from roles");
+    
+    enums.forEach((r) => {
+
+      if (!r.role)
+        throw Error(
+          "bad schema > expected 'role atribute in roles array object schema'"
+        );
+
+      if (typeof r.role !== "string")
+        throw Error("every role should be a string");
+    });
+    this.roles = enums;
     this.user = require("../../../models/index").user;
   }
 
   async isAuthenticated({ id }) {
     try {
       if (typeof id !== "string") return false;
+
       if (!this.checker()) {
         throw new Error("this role is not exist in app roles");
       }
@@ -26,7 +45,7 @@ class gaurd {
         return user.role.title !== this.role ? false : user;
       }
     } catch (e) {
-      console.log(e);
+      process.env.NODE_ENV === "development" ? console.log(e) : null;
     }
   }
   checker() {
@@ -45,7 +64,7 @@ class gaurd {
         return true;
       }
     } catch (e) {
-      console.log(e);
+      process.env.NODE_ENV === "development" ? console.log(e) : null;
     }
   }
 }

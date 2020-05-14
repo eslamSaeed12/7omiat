@@ -10,7 +10,7 @@ module.exports = ({
         token
       } = req.headers;
 
-      if (!token) return res.json({
+      if (!token) return res.status(401).json({
         message: "unAuthorized"
       }); // redirect to the unauthoriezed endpoint
 
