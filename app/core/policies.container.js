@@ -1,15 +1,12 @@
 const abstractPolicy = require("./policies/abstract.policies");
 
-
-
-// declare policies here 
+// declare policies here
 
 module.exports = new abstractPolicy({
-
-  createUsers({ user }) {
-    if (user === "islam") {
+  isSuperUser({ user }) {
+    if (user && user.role && user.role.title === "superuser") {
       return true;
     }
+    return false;
   },
-  
 });

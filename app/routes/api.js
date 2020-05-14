@@ -9,6 +9,7 @@ module.exports = ({ controllers, helpers, db, authMD, passport, gates }) => {
   );
 
   (async () => {
+    console.log(gates);
     // auth area
     route.post("/auth/login", auth.login);
     route.get(
@@ -71,7 +72,7 @@ module.exports = ({ controllers, helpers, db, authMD, passport, gates }) => {
     route.delete("/hospitals", await authMD("admins"), hospitals.delete);
 
     // users area
-    route.get("/user", await authMD("superuser"), user.index);
+    route.get("/user", await authMD("admins"), user.index);
     route.get("/user/:id", await authMD("superuser"), user.find);
     route.post("/user", await authMD("superuser"), user.create);
     route.patch("/user", await authMD("superuser"), user.update);

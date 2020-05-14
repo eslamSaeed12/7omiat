@@ -1,4 +1,4 @@
-module.exports = ({ helpers, db }) => {
+module.exports = ({ helpers, db, gates }) => {
   return {
     logs: require("./logs.controller")({ helpers }),
     errors: require("./errors.controller")({ helpers }),
@@ -21,6 +21,7 @@ module.exports = ({ helpers, db }) => {
     user: require("./user.controller")({
       helpers,
       db,
+      gates,
     }),
   };
 };

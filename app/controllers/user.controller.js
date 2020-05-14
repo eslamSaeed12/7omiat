@@ -1,12 +1,22 @@
 const { Op } = require("sequelize");
-const usersController = ({ helpers, db }) => {
+const usersController = ({ helpers, db, gates }) => {
   return {
     async index(req, res, next) {
       try {
         const { user } = db;
         let cover;
-        const users = await user.findAll({ include: "role" });
-        cover = helpers.restful({ type: 1, msg: 302 })(users || []);
+        if (gates.can("isSuperUser", { user: req.auth })) {
+          const users = await user.findAll({
+            include: "role",
+          });
+          cover = helpers.restful({ type: 1, msg: 302 })(users);
+          return res.status(cover.code).json(cover);
+        }
+        const users = await user.findAll({
+          include: "role",
+          attributes: ["id", "username"],
+        });
+        cover = helpers.restful({ type: 1, msg: 302 })(users);
         return res.status(cover.code).json(cover);
       } catch (e) {
         return next(e);
@@ -250,6 +260,6 @@ const usersController = ({ helpers, db }) => {
   };
 };
 
-module.exports = ({ helpers, db }) => {
-  return usersController({ helpers, db });
+module.exports = ({ helpers, db, gates }) => {
+  return usersController({ helpers, db, gates });
 };
