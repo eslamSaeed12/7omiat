@@ -21,7 +21,7 @@
     "csurf": "^1.11.0",
     "dotenv": "^8.2.0",
     "errorhandler": "^1.5.1",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "express-winston": "^4.0.3",
     "helmet": "^3.22.0",
     "joi": "^14.3.1",
